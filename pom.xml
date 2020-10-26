@@ -248,7 +248,7 @@
 
 
     <build>
-        <finalName>mmall</finalName>
+        <finalName>jmall</finalName>
         <plugins>
             <plugin>
                 <groupId>org.mybatis.generator</groupId>

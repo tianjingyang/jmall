@@ -157,12 +157,39 @@
     where username = #{username}
   </select>
 
+  <select id="selectByEmail" parameterType="string" resultType="int">
+    select count(1)
+    from jmall_user
+    where email = #{email}
+  </select>
+
   <select id="selectByUsernameAndPassword" parameterType="map" resultMap="BaseResultMap">
-    select *
+    select
+    <include refid="Base_Column_List" />
     from jmall_user
     where username = #{username}
     and password = #{password}
   </select>
+
+  <select id="selectQuestion" resultType="string" parameterType="string">
+    select question
+    from jmall_user
+    where username = #{username}
+  </select>
+
+  <select id="checkAnswer" parameterType="map" resultType="int">
+    select count(1)
+    from jmall_user
+    where username = #{username}
+    and question = #{question}
+    and answer = #{answer}
+  </select>
+
+  <update id="updatePasswordByUsername" parameterType="map">
+    update jmall_user
+    SET password = #{passwordNew},update_time = now()
+    where username = #{username}
+  </update>
 
 
 
