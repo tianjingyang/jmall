@@ -17,10 +17,11 @@ public class PropertiesUtil {
     private static Properties props;
 
     static {
-        String fileName = "jmall.Properties";
+        String fileName = "jmall.properties";
         props = new Properties();
         try {
-            props.load(new InputStreamReader(PropertiesUtil.class.getClassLoader().getResourceAsStream(fileName),"utf-8"));
+            props.load(new InputStreamReader(PropertiesUtil.class.getClassLoader().getResourceAsStream(fileName),
+                     "utf-8"));
         } catch (IOException e) {
             logger.error("读取配置文件异常",e);
         }
@@ -34,8 +35,7 @@ public class PropertiesUtil {
         return value.trim();
     }
 
-
-    public static String getProperty(String key, String defaultValue) {
+    public static String getProperty(String key,String defaultValue) {
         String value = props.getProperty(key.trim());
         if (StringUtils.isBlank(value)) {
             value = defaultValue;

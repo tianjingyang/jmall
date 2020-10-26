@@ -150,4 +150,37 @@
       update_time = now()
     where id = #{id,jdbcType=INTEGER}
   </update>
+
+  <select id="selectByUsername" parameterType="string" resultType="int">
+    select count(1)
+    from jmall_user
+    where username = #{username}
+  </select>
+
+  <select id="selectByUsernameAndPassword" parameterType="map" resultMap="BaseResultMap">
+    select *
+    from jmall_user
+    where username = #{username}
+    and password = #{password}
+  </select>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </mapper>
