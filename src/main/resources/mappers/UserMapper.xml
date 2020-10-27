@@ -191,6 +191,13 @@
     where username = #{username}
   </update>
 
+  <select id="checkEmailByUserId" parameterType="map" resultType="int">
+    select count(1)
+    from jmall_user
+    where email = #{email}
+    and userId != #{userId}
+  </select>
+
 
 
 

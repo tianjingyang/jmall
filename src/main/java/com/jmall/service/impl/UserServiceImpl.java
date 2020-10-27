@@ -121,9 +121,58 @@ public class UserServiceImpl implements IUserService {
         }
     }
 
+    public ServerResponse<String> resetPassword(String username, String passwordOld, String passwordNew) {
+        User user = userMapper.selectByUsernameAndPassword(username,MD5Util.MD5EncodeUtf8(passwordOld));
+        if (user == null) {
+            return ServerResponse.createByErrorMessage("旧密码错误");
+        }
+        //新密码
+        user.setPassword(MD5Util.MD5EncodeUtf8(passwordNew));
+        int rowCount = userMapper.updateByPrimaryKeySelective(user);
+        if (rowCount > 0) {
+            return ServerResponse.createBySuccessMessage("修改密码成功");
+        }
+        return ServerResponse.createByErrorMessage("修改密码失败");
+    }
+
+    public ServerResponse<User> updateInformation(User user) {
+        //username不能被更新
+        //更新的email要检查除了自己以外的用户有没有在使用
+        int rowCount = userMapper.checkEmailByUserId(user.getEmail(),user.getId());
+        if (rowCount > 0) {
+            return ServerResponse.createByErrorMessage("email被他人占用");
+        }
+        rowCount = userMapper.updateByPrimaryKeySelective(user);
+        if (rowCount > 0) {
+            User currentUser = userMapper.selectByPrimaryKey(user.getId());
+            return ServerResponse.createBySuccess("更新信息成功",currentUser);
+        }
+        return ServerResponse.createByErrorMessage("更新信息失败");
+    }
+
+    public ServerResponse<User> getInformation(Integer userId) {
+        User user = userMapper.selectByPrimaryKey(userId);
+        if (user == null) {
+            return ServerResponse.createByErrorMessage("找不到当前用户");
+        }
+        user.setPassword(StringUtils.EMPTY);
+        return ServerResponse.createBySuccess(user);
+    }
 
 
+    //backend
 
+    /**
+     * 校验是否是管理员
+     * @param user
+     * @return
+     */
+    public ServerResponse checkAdminRole(User user){
+        if(user != null && user.getRole().intValue() == Const.Role.ROLE_ADMIN){
+            return ServerResponse.createBySuccess();
+        }
+        return ServerResponse.createByError();
+    }
 
 
 
