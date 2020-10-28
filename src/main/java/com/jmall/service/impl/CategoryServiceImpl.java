@@ -68,8 +68,10 @@ public class CategoryServiceImpl implements ICategoryService {
         findChildCategory(categorySet,categoryId);
 
         List<Integer> categoryIdList = Lists.newArrayList();
-        for (Category categoryItem : categorySet) {
-            categoryIdList.add(categoryItem.getId());
+        if (categoryId != null) {
+            for (Category categoryItem : categorySet) {
+                categoryIdList.add(categoryItem.getId());
+            }
         }
         return ServerResponse.createBySuccess(categoryIdList);
     }
