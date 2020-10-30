@@ -21,7 +21,7 @@ public class CategoryServiceImpl implements ICategoryService {
     @Autowired
     private CategoryMapper categoryMapper;
 
-    private Logger logger = LoggerFactory.getLogger(CategoryServiceImpl.class);
+    private final Logger logger = LoggerFactory.getLogger(CategoryServiceImpl.class);
 
     public ServerResponse getParallelChildrenByPrentId(Integer categoryId) {
         List<Category> categoryList = categoryMapper.getParallelChildrenByPrentId(categoryId);
