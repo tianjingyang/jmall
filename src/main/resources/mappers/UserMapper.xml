@@ -195,7 +195,7 @@
     select count(1)
     from jmall_user
     where email = #{email}
-    and userId != #{userId}
+    and id != #{userId}
   </select>
 
 
