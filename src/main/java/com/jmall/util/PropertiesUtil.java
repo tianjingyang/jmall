@@ -1,8 +1,8 @@
 package com.jmall.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.Properties;
@@ -10,9 +10,8 @@ import java.util.Properties;
 /**
  * Create by tristan
  */
+@Slf4j
 public class PropertiesUtil {
-
-    private static Logger logger = LoggerFactory.getLogger(PropertiesUtil.class);
 
     private static Properties props;
 
@@ -23,7 +22,7 @@ public class PropertiesUtil {
             props.load(new InputStreamReader(PropertiesUtil.class.getClassLoader().getResourceAsStream(fileName),
                      "utf-8"));
         } catch (IOException e) {
-            logger.error("读取配置文件异常",e);
+            log.error("读取配置文件异常",e);
         }
     }
 
