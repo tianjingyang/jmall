@@ -5,8 +5,12 @@ import com.google.common.collect.Sets;
 import java.util.Set;
 
 public class Const {
+
     //当前用户
     public static final String CURRENT_USER = "currentUser";
+
+    //token前缀
+    public static final String TOKEN_PREFIX = "token_";
 
     //校验用户名和email
     public static final String EMAIL = "email";

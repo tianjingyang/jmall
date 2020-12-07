@@ -5,10 +5,16 @@ import com.jmall.common.ResponseCode;
 import com.jmall.common.ServerResponse;
 import com.jmall.pojo.User;
 import com.jmall.service.ICartService;
+import com.jmall.util.CookieUtil;
+import com.jmall.util.JsonUtil;
+import com.jmall.util.RedisPoolUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 @Controller
@@ -17,11 +23,13 @@ public class CartController {
 
     @Autowired
     private ICartService iCartService;
+    @Autowired
+    private UserController userController;
 
     @RequestMapping("list.do")
     @ResponseBody
-    public ServerResponse list(HttpSession session) {
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
+    public ServerResponse list(HttpServletRequest httpServletRequest) {
+        User user = userController.getCurrentUser(httpServletRequest).getData();
         if (user == null) {
             return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
         }
@@ -30,8 +38,8 @@ public class CartController {
 
     @RequestMapping("add.do")
     @ResponseBody
-    public ServerResponse add(HttpSession session,Integer productId,Integer count) {
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
+    public ServerResponse add(HttpServletRequest httpServletRequest,Integer productId,Integer count) {
+        User user = userController.getCurrentUser(httpServletRequest).getData();
         if (user == null) {
             return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
         }
@@ -40,8 +48,13 @@ public class CartController {
 
     @RequestMapping("update.do")
     @ResponseBody
-    public ServerResponse update(HttpSession session,Integer productId,Integer count) {
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
+    public ServerResponse update(HttpServletRequest httpServletRequest,Integer productId,Integer count) {
+        String loginToken = CookieUtil.readLoginToken(httpServletRequest);
+        if (StringUtils.isEmpty(loginToken)) {
+            return ServerResponse.createByErrorMessage("用户未登录,无法获取当前用户信息");
+        }
+        String userJsonStr = RedisPoolUtil.get(loginToken);
+        User user = JsonUtil.string2Obj(userJsonStr,User.class);
         if (user == null) {
             return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
         }
@@ -50,8 +63,8 @@ public class CartController {
 
     @RequestMapping("delete_product.do")
     @ResponseBody
-    public ServerResponse deleteProduct(HttpSession session,String productIds) {
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
+    public ServerResponse deleteProduct(HttpServletRequest httpServletRequest,String productIds) {
+        User user = userController.getCurrentUser(httpServletRequest).getData();
         if (user == null) {
             return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
         }
@@ -60,8 +73,8 @@ public class CartController {
 
     @RequestMapping("select_all.do")
     @ResponseBody
-    public ServerResponse selectAll(HttpSession session) {
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
+    public ServerResponse selectAll(HttpServletRequest httpServletRequest) {
+        User user = userController.getCurrentUser(httpServletRequest).getData();
         if (user == null) {
             return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
         }
@@ -70,8 +83,8 @@ public class CartController {
 
     @RequestMapping("un_select_all.do")
     @ResponseBody
-    public ServerResponse unSelectAll(HttpSession session) {
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
+    public ServerResponse unSelectAll(HttpServletRequest httpServletRequest) {
+        User user = userController.getCurrentUser(httpServletRequest).getData();
         if (user == null) {
             return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
         }
@@ -80,8 +93,8 @@ public class CartController {
 
     @RequestMapping("select.do")
     @ResponseBody
-    public ServerResponse select(HttpSession session,Integer productId) {
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
+    public ServerResponse select(HttpServletRequest httpServletRequest,Integer productId) {
+        User user = userController.getCurrentUser(httpServletRequest).getData();
         if (user == null) {
             return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
         }
@@ -90,8 +103,8 @@ public class CartController {
 
     @RequestMapping("un_select.do")
     @ResponseBody
-    public ServerResponse unSelect(HttpSession session,Integer productId) {
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
+    public ServerResponse unSelect(HttpServletRequest httpServletRequest,Integer productId) {
+        User user = userController.getCurrentUser(httpServletRequest).getData();
         if (user == null) {
             return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
         }
@@ -100,8 +113,8 @@ public class CartController {
 
     @RequestMapping("get_cart_product_count.do")
     @ResponseBody
-    public ServerResponse getCartProductCount(HttpSession session) {
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
+    public ServerResponse getCartProductCount(HttpServletRequest httpServletRequest) {
+        User user = userController.getCurrentUser(httpServletRequest).getData();
         if (user == null) {
             return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
         }

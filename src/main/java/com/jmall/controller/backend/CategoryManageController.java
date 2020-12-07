@@ -3,6 +3,7 @@ package com.jmall.controller.backend;
 import com.jmall.common.Const;
 import com.jmall.common.ResponseCode;
 import com.jmall.common.ServerResponse;
+import com.jmall.controller.portal.UserController;
 import com.jmall.pojo.User;
 import com.jmall.service.ICategoryService;
 import com.jmall.service.IUserService;
@@ -11,6 +12,8 @@ import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
+
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 import java.util.List;
 
@@ -20,14 +23,15 @@ public class CategoryManageController {
 
     @Autowired
     private IUserService iUserService;
-
     @Autowired
     private ICategoryService iCategoryService;
+    @Autowired
+    private UserController userController;
 
     @RequestMapping(value = "get_category.do")
     @ResponseBody
-    public ServerResponse getCategory(HttpSession session, @RequestParam(value = "categoryId", defaultValue = "0") Integer categoryId) {
-        User user = (User)session.getAttribute(Const.CURRENT_USER);
+    public ServerResponse getCategory(HttpServletRequest httpServletRequest, @RequestParam(value = "categoryId", defaultValue = "0") Integer categoryId) {
+        User user = userController.getCurrentUser(httpServletRequest).getData();
         if(user == null){
             return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),"用户未登录,请登录");
         }
@@ -41,8 +45,8 @@ public class CategoryManageController {
 
     @RequestMapping("add_category.do")
     @ResponseBody
-    public ServerResponse addCategory(HttpSession session,String categoryName,@RequestParam(value = "parentId",defaultValue = "0") int parentId){
-        User user = (User)session.getAttribute(Const.CURRENT_USER);
+    public ServerResponse addCategory(HttpServletRequest httpServletRequest,String categoryName,@RequestParam(value = "parentId",defaultValue = "0") int parentId){
+        User user = userController.getCurrentUser(httpServletRequest).getData();
         if(user == null){
             return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),"用户未登录,请登录");
         }
@@ -59,8 +63,8 @@ public class CategoryManageController {
 
     @RequestMapping("set_category_name.do")
     @ResponseBody
-    public ServerResponse setCategoryName(HttpSession session,Integer categoryId,String categoryName){
-        User user = (User)session.getAttribute(Const.CURRENT_USER);
+    public ServerResponse setCategoryName(HttpServletRequest httpServletRequest,Integer categoryId,String categoryName){
+        User user = userController.getCurrentUser(httpServletRequest).getData();
         if(user == null){
             return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),"用户未登录,请登录");
         }
@@ -74,8 +78,8 @@ public class CategoryManageController {
 
     @RequestMapping("get_deep_category.do")
     @ResponseBody
-    public ServerResponse<List<Integer>> getCategoryAndDeepChildrenCategory(HttpSession session,@RequestParam(value = "categoryId" ,defaultValue = "0") Integer categoryId){
-        User user = (User)session.getAttribute(Const.CURRENT_USER);
+    public ServerResponse<List<Integer>> getCategoryAndDeepChildrenCategory(HttpServletRequest httpServletRequest,@RequestParam(value = "categoryId" ,defaultValue = "0") Integer categoryId){
+        User user = userController.getCurrentUser(httpServletRequest).getData();
         if(user == null){
             return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),"用户未登录,请登录");
         }

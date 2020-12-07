@@ -6,7 +6,6 @@ import com.jmall.util.CookieUtil;
 import com.jmall.util.JsonUtil;
 import com.jmall.util.RedisPoolUtil;
 import org.apache.commons.lang3.StringUtils;
-
 import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import java.io.IOException;
