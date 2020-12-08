@@ -33,7 +33,7 @@ target/
 .DS_Store
 Thumbs.db
 
-#index.jsp
-index.jsp
+#暂时关闭了Git对index.jsp文件的跟踪，命令行：git update-index --skip-worktree "src/main/webapp/index.jsp"
+#如果想打开，则执行：git update-index --no-skip-worktree "src/main/webapp/index.jsp"
 
 
