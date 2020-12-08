@@ -1,12 +1,15 @@
 package com.jmall.common;
 
 import com.jmall.util.PropertiesUtil;
-import redis.clients.jedis.Jedis;
-import redis.clients.jedis.JedisPool;
-import redis.clients.jedis.JedisPoolConfig;
+import redis.clients.jedis.*;
+import redis.clients.util.Hashing;
+import redis.clients.util.Sharded;
+import java.util.ArrayList;
+import java.util.List;
 
-public class RedisPool {
-    private static JedisPool pool;//jedis连接池
+public class RedisShardedPool {
+    private static ShardedJedisPool pool;//sharded jedis连接池
+
     private static Integer maxTotal = Integer.parseInt(PropertiesUtil.getProperty("redis.maxTotal","20")); //最大连接数
     private static Integer maxIdle = Integer.parseInt(PropertiesUtil.getProperty("redis.maxIdle","10"));//在jedispool中最大的idle状态(空闲的)的jedis实例的个数
     private static Integer minIdle = Integer.parseInt(PropertiesUtil.getProperty("redis.minIdle","2"));//在jedispool中最小的idle状态(空闲的)的jedis实例的个数
@@ -14,8 +17,10 @@ public class RedisPool {
     private static Boolean testOnBorrow = Boolean.parseBoolean(PropertiesUtil.getProperty("redis.testOnBorrow","true"));//在borrow一个jedis实例的时候，是否要进行验证操作，如果赋值true。则得到的jedis实例肯定是可以用的。
     private static Boolean testOnReturn = Boolean.parseBoolean(PropertiesUtil.getProperty("redis.testOnReturn","true"));//在return一个jedis实例的时候，是否要进行验证操作，如果赋值true。则放回jedispool的jedis实例肯定是可以用的。
 
-    private static String redisIp = PropertiesUtil.getProperty("redis.ip");
-    private static Integer redisPort = Integer.parseInt(PropertiesUtil.getProperty("redis.port"));
+    private static String redis1Ip = PropertiesUtil.getProperty("redis1.ip");
+    private static Integer redis1Port = Integer.parseInt(PropertiesUtil.getProperty("redis1.port"));
+    private static String redis2Ip = PropertiesUtil.getProperty("redis2.ip");
+    private static Integer redis2Port= Integer.parseInt(PropertiesUtil.getProperty("redis2.port"));
 
 
     private static void initPool(){
@@ -30,31 +35,39 @@ public class RedisPool {
 
         config.setBlockWhenExhausted(true);//连接耗尽的时候，是否阻塞，false会抛出异常，true阻塞直到超时。默认为true。
 
-        pool = new JedisPool(config,redisIp,redisPort,1000*2);
+        JedisShardInfo info1 = new JedisShardInfo(redis1Ip,redis1Port,1000*2);
+
+        JedisShardInfo info2 = new JedisShardInfo(redis2Ip,redis2Port,1000*2);
+
+        List<JedisShardInfo> jedisShardInfoList = new ArrayList<JedisShardInfo>(2);
+
+        jedisShardInfoList.add(info1);
+        jedisShardInfoList.add(info2);
+
+        pool = new ShardedJedisPool(config,jedisShardInfoList, Hashing.MURMUR_HASH, Sharded.DEFAULT_KEY_TAG_PATTERN);
     }
 
     static{
         initPool();
     }
 
-    public static Jedis getJedis(){
+    public static ShardedJedis getJedis(){
         return pool.getResource();
     }
 
-    public static void returnBrokenResource(Jedis jedis){
-        //此方法jedis2.9.0之后不再支持
+    public static void returnBrokenResource(ShardedJedis jedis){
         pool.returnBrokenResource(jedis);
     }
 
-    public static void returnResource(Jedis jedis){
-        //此方法jedis2.9.0之后不再支持
+    public static void returnResource(ShardedJedis jedis){
         pool.returnResource(jedis);
     }
 
     public static void main(String[] args) {
-        Jedis jedis = pool.getResource();
-        jedis.set("test","test");
-        returnResource(jedis);
+        ShardedJedis jedis = pool.getResource();
+        for (int i = 0; i <=100; i++) {
+            jedis.set("key"+i,"value"+i);
+        }
         System.out.println("program is end");
     }
 }

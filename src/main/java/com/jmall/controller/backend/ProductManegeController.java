@@ -13,7 +13,7 @@ import com.jmall.service.IUserService;
 import com.jmall.util.CookieUtil;
 import com.jmall.util.JsonUtil;
 import com.jmall.util.PropertiesUtil;
-import com.jmall.util.RedisPoolUtil;
+import com.jmall.util.RedisShardedPoolUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -204,7 +204,7 @@ public class ProductManegeController {
             resultMap.put("success",false);
             resultMap.put("msg","请登录管理员");
             return resultMap;        }
-        String userJsonStr = RedisPoolUtil.get(loginToken);
+        String userJsonStr = RedisShardedPoolUtil.get(loginToken);
         User user = JsonUtil.string2Obj(userJsonStr,User.class);
         if(user == null){
             resultMap.put("success",false);
