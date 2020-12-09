@@ -36,4 +36,8 @@ Thumbs.db
 #暂时关闭了Git对index.jsp文件的跟踪，命令行：git update-index --skip-worktree "src/main/webapp/index.jsp"
 #如果想打开，则执行：git update-index --no-skip-worktree "src/main/webapp/index.jsp"
 
+#git update-index --assume-unchanged "/app/*.xml";//关闭跟踪app目录下后缀为.xml的文件
+#git update-index --assume-unchanged "/app/";//打开跟踪app目录下的所有文件
+
+
 

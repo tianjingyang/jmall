@@ -243,16 +243,24 @@
         <dependency>
             <groupId>redis.clients</groupId>
             <artifactId>jedis</artifactId>
-            <version>2.9.0</version>
+            <version>2.6.0</version>
         </dependency>
-        <!-- Spring整合redis -->
-        <!-- https://mvnrepository.com/artifact/org.springframework.data/spring-data-redis -->
+        <!--    spring-session 结合redis实现低入侵单点登录    -->
         <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-redis</artifactId>
-            <version>1.8.4.RELEASE</version>
+            <groupId>org.springframework.session</groupId>
+            <artifactId>spring-session-data-redis</artifactId>
+            <version>1.2.0.RELEASE</version>
         </dependency>
 
+        <!-- Spring整合redis（这个依赖是想在SSM框架下整合RedisCluster，没有成功）-->
+        <!-- https://mvnrepository.com/artifact/org.springframework.data/spring-data-redis -->
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.data</groupId>-->
+<!--            <artifactId>spring-data-redis</artifactId>-->
+<!--            <version>1.8.4.RELEASE</version>-->
+<!--        </dependency>-->
+
+        <!-- bean的get和set方法自动生成，无参构造，全参构造，重写equals和hash方法-->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
