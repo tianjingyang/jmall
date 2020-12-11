@@ -18,7 +18,7 @@ public class Const {
 
     //Redis缓存时间
     public interface RedisCacheExtime{
-        int REDIS_SESSION_EXTIME = 60 * 30;//30分钟
+        int REDIS_SESSION_EXTIME = 1800;//30分钟
     }
 
     //商品排序字段
