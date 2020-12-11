@@ -7,6 +7,7 @@ import redis.clients.jedis.*;
 
 /**
  * jedis依赖版本2.9.0！！！！！！！！！
+ * 该类创建了个GenericObjectPool连接池，把JedisCluster放在里面
  */
 public class RedisClusterPool {
 
