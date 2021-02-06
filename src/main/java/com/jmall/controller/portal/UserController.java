@@ -1,13 +1,15 @@
 package com.jmall.controller.portal;
 
 import com.jmall.common.Const;
+import com.jmall.common.RedisCluster;
 import com.jmall.common.ResponseCode;
 import com.jmall.common.ServerResponse;
 import com.jmall.pojo.User;
 import com.jmall.service.IUserService;
 import com.jmall.util.CookieUtil;
 import com.jmall.util.JsonUtil;
-import com.jmall.util.RedisShardedPoolUtil;
+import com.jmall.util.RedisClusterUtil;
+import com.jmall.util.RedisClusterUtil;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -31,46 +33,47 @@ public class UserController {
 
     /**
      * 用户登录
-     * @param username
-     * @param password
-     * @param session
-     * @return
+     * @param username 用户名
+     * @param password 密码
+     * @param session session
+     * @param httpServletResponse response
+     * @return user
      */
     @RequestMapping(value = "login.do", method = RequestMethod.POST)
     @ResponseBody
     public ServerResponse<User> login(String username, String password, HttpSession session,
                                       HttpServletResponse httpServletResponse) {
-        ServerResponse response = iUserService.login(username,password);
+        ServerResponse<User> response = iUserService.login(username,password);
         if (response.isSuccess()) {
             //把此次请求的JSESSIONID存入cookie的value
             CookieUtil.writeLoginToken(httpServletResponse,session.getId());
             //缓存进redis
-            RedisShardedPoolUtil.setEx(session.getId(), JsonUtil.obj2String(response.getData()),Const.RedisCacheExtime.REDIS_SESSION_EXTIME);
+            RedisClusterUtil.setEx(session.getId(), JsonUtil.obj2String(response.getData()),Const.RedisCacheExtime.REDIS_SESSION_EXTIME);
         }
         return response;
     }
 
     /**
-     *
-     * @param httpServletRequest
-     * @param httpServletResponse
-     * @return
+     * 登出
+     * @param httpServletRequest request
+     * @param httpServletResponse response
+     * @return String
      */
     @RequestMapping(value = "logout.do", method = RequestMethod.GET)
     @ResponseBody
     public ServerResponse<String> logout(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse) {
         String loginToken = CookieUtil.readLoginToken(httpServletRequest);
         CookieUtil.delLoginToken(httpServletRequest,httpServletResponse);
-        RedisShardedPoolUtil.del(loginToken);
+        RedisClusterUtil.del(loginToken);
 
         return ServerResponse.createBySuccess();
     }
 
     /**
      * 注册
-     * @param user
-     * @param session
-     * @return
+     * @param user 用户名
+     * @param session session
+     * @return String
      */
     @RequestMapping(value = "register.do", method = RequestMethod.POST)
     @ResponseBody
@@ -79,10 +82,10 @@ public class UserController {
     }
 
     /**
-     * 校验用户名密码
-     * @param str
-     * @param type
-     * @return
+     * 校验用户名或者email是否存在
+     * @param str 输入字段
+     * @param type 字段类型（username、email）
+     * @return  String
      */
     @RequestMapping(value = "check_valid.do", method = RequestMethod.POST)
     @ResponseBody
@@ -92,28 +95,19 @@ public class UserController {
 
     /**
      *
-     * @param httpServletRequest
-     * @return
+     * @param httpServletRequest request
+     * @return User
      */
     @RequestMapping(value = "get_user_info.do", method = RequestMethod.POST)
     @ResponseBody
     public ServerResponse<User> getUserInfo(HttpServletRequest httpServletRequest) {
-        String loginToken = CookieUtil.readLoginToken(httpServletRequest);
-        if (StringUtils.isEmpty(loginToken)) {
-            return ServerResponse.createByErrorMessage("用户未登录,无法获取当前用户信息");
-        }
-        String userJsonStr = RedisShardedPoolUtil.get(loginToken);
-        User user = JsonUtil.string2Obj(userJsonStr,User.class);
-        if (user != null) {
-            return ServerResponse.createBySuccess(user);
-        }
-        return ServerResponse.createByErrorMessage("用户未登录,无法获取当前用户信息");
+        return getCurrentUser(httpServletRequest);
     }
 
     /**
      * 获取密码提示问题
-     * @param username
-     * @return
+     * @param username 用户名
+     * @return String
      */
     @RequestMapping(value = "forget_get_question.do", method = RequestMethod.POST)
     @ResponseBody
@@ -123,10 +117,10 @@ public class UserController {
 
     /**
      * 验证问题答案
-     * @param username
-     * @param question
-     * @param answer
-     * @return
+     * @param username 用户名
+     * @param question 密码提示问题
+     * @param answer 密码提示答案
+     * @return String
      */
     @RequestMapping(value = "forget_check_answer.do", method = RequestMethod.POST)
     @ResponseBody
@@ -136,10 +130,10 @@ public class UserController {
 
     /**
      * 忘记密码时重设密码
-     * @param username
-     * @param passwordNew
-     * @param forgetToken
-     * @return
+     * @param username 用户名
+     * @param passwordNew 新密码
+     * @param forgetToken 忘记密码token
+     * @return String
      */
     @RequestMapping(value = "forget_reset_password.do", method = RequestMethod.POST)
     @ResponseBody
@@ -149,27 +143,28 @@ public class UserController {
 
     /**
      * 登录状态重置密码
-     * @param passwordOld
-     * @param passwordNew
-     * @param session
-     * @return
+     * @param passwordOld 旧密码
+     * @param passwordNew 新密码
+     * @param httpServletRequest request
+     * @return String
      */
     @RequestMapping(value = "reset_password.do", method = RequestMethod.POST)
     @ResponseBody
-    public ServerResponse<String> resetPassword(String passwordOld, String passwordNew, HttpSession session) {
-        User user = (User) session.getAttribute(Const.CURRENT_USER);
-        if (user == null) {
-            return ServerResponse.createByErrorMessage("用户未登录");
+    public ServerResponse<String> resetPassword(String passwordOld, String passwordNew, HttpServletRequest httpServletRequest) {
+        ServerResponse response = getCurrentUser(httpServletRequest);
+        if (!response.isSuccess()) {
+            return response;
         }
+        User user = (User)response.getData();
         String username = user.getUsername();
         return iUserService.resetPassword(username, passwordOld, passwordNew);
     }
 
     /**
      *
-     * @param httpServletRequest
-     * @param user
-     * @return
+     * @param httpServletRequest request
+     * @param user user
+     * @return user
      */
     @RequestMapping(value = "update_information.do", method = RequestMethod.POST)
     @ResponseBody
@@ -178,7 +173,7 @@ public class UserController {
         if (StringUtils.isEmpty(loginToken)) {
             return ServerResponse.createByErrorMessage("用户未登录,无法获取当前用户信息");
         }
-        String userJsonStr = RedisShardedPoolUtil.get(loginToken);
+        String userJsonStr = RedisClusterUtil.get(loginToken);
         User currentUser = JsonUtil.string2Obj(userJsonStr,User.class);
         if (currentUser == null) {
             return ServerResponse.createByErrorMessage("用户未登录");
@@ -189,24 +184,25 @@ public class UserController {
         if(response.isSuccess()){
             response.getData().setUsername(currentUser.getUsername());
             //缓存进redis
-            RedisShardedPoolUtil.setEx(loginToken, JsonUtil.obj2String(response.getData()),Const.RedisCacheExtime.REDIS_SESSION_EXTIME);
+            RedisClusterUtil.setEx(loginToken, JsonUtil.obj2String(response.getData()),Const.RedisCacheExtime.REDIS_SESSION_EXTIME);
         }
         return response;
     }
 
     /**
      * 获取个人信息
-     * @param httpServletRequest
-     * @return
+     * @param httpServletRequest request
+     * @return user
      */
     @RequestMapping(value = "get_information.do",method = RequestMethod.POST)
     @ResponseBody
     public ServerResponse<User> get_information(HttpServletRequest httpServletRequest){
-        User currentUser = getCurrentUser(httpServletRequest).getData();
-        if(currentUser == null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),"未登录,需要强制登录status=10");
+        ServerResponse response = getCurrentUser(httpServletRequest);
+        if (!response.isSuccess()) {
+            return response;
         }
-        return iUserService.getInformation(currentUser.getId());
+        User user = (User)response.getData();
+        return iUserService.getInformation(user.getId());
     }
 
     public ServerResponse<User> getCurrentUser(HttpServletRequest httpServletRequest) {
@@ -214,8 +210,11 @@ public class UserController {
         if (StringUtils.isEmpty(loginToken)) {
             return ServerResponse.createByErrorMessage("用户未登录,无法获取当前用户信息");
         }
-        String userJsonStr = RedisShardedPoolUtil.get(loginToken);
+        String userJsonStr = RedisClusterUtil.get(loginToken);
         User user = JsonUtil.string2Obj(userJsonStr,User.class);
+        if (user == null) {
+            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
+        }
         return ServerResponse.createBySuccess(user);
     }
 }

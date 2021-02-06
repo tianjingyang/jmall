@@ -21,7 +21,7 @@ public class CategoryServiceImpl implements ICategoryService {
     @Autowired
     private CategoryMapper categoryMapper;
 
-    public ServerResponse getParallelChildrenByPrentId(Integer categoryId) {
+    public ServerResponse<List<Category>> getParallelChildrenByPrentId(Integer categoryId) {
         List<Category> categoryList = categoryMapper.getParallelChildrenByPrentId(categoryId);
         if (CollectionUtils.isEmpty(categoryList)) {
             log.info("未找到当前分类的子分类");
@@ -29,7 +29,7 @@ public class CategoryServiceImpl implements ICategoryService {
         return ServerResponse.createBySuccess(categoryList);
     }
 
-    public ServerResponse addCategory(String categoryName,Integer parentId){
+    public ServerResponse<String> addCategory(String categoryName,Integer parentId){
         if(parentId == null || StringUtils.isBlank(categoryName)){
             return ServerResponse.createByErrorMessage("添加品类参数错误");
         }
@@ -46,7 +46,7 @@ public class CategoryServiceImpl implements ICategoryService {
         return ServerResponse.createByErrorMessage("添加品类失败");
     }
 
-    public ServerResponse updateCategoryName(Integer categoryId,String categoryName){
+    public ServerResponse<String> updateCategoryName(Integer categoryId,String categoryName){
         if(categoryId == null || StringUtils.isBlank(categoryName)){
             return ServerResponse.createByErrorMessage("更新品类参数错误");
         }
@@ -63,7 +63,7 @@ public class CategoryServiceImpl implements ICategoryService {
 
     public ServerResponse<List<Integer>> selectCategoryAndChildrenById(Integer categoryId){
         Set<Category> categorySet = Sets.newHashSet();
-        findChildCategory(categorySet,categoryId);
+        findChildCategory(categorySet, categoryId);
 
         List<Integer> categoryIdList = Lists.newArrayList();
         if (categoryId != null) {
@@ -80,7 +80,7 @@ public class CategoryServiceImpl implements ICategoryService {
          2,给出的categoryId的子分类
          3,递归调用本方法获得子分类的下级分类
      */
-    private Set<Category> findChildCategory(Set<Category> categorySet,Integer categoryId) {
+    private void findChildCategory(Set<Category> categorySet, Integer categoryId) {
         //1，查出给的categoryId对应的category
         Category category = categoryMapper.selectByPrimaryKey(categoryId);
         //判断非空后加入set里
@@ -93,6 +93,5 @@ public class CategoryServiceImpl implements ICategoryService {
         for (Category categoryItem : categoryList) {
             findChildCategory(categorySet,categoryItem.getId());
         }
-        return categorySet;
     }
 }

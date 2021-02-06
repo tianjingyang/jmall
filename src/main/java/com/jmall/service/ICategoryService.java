@@ -6,11 +6,11 @@ import java.util.List;
 
 public interface ICategoryService {
 
-    ServerResponse getParallelChildrenByPrentId(Integer categoryId);
+    ServerResponse<List<Category>> getParallelChildrenByPrentId(Integer categoryId);
 
-    ServerResponse addCategory(String categoryName,Integer parentId);
+    ServerResponse<String> addCategory(String categoryName,Integer parentId);
 
-    ServerResponse updateCategoryName(Integer categoryId,String categoryName);
+    ServerResponse<String> updateCategoryName(Integer categoryId,String categoryName);
 
     ServerResponse<List<Integer>> selectCategoryAndChildrenById(Integer categoryId);
 }

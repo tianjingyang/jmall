@@ -42,7 +42,7 @@ import java.util.*;
 public class OrderServiceImpl implements IOrderService {
 
     // 支付宝当面付2.0服务
-    private static  AlipayTradeService tradeService;
+    private static final AlipayTradeService tradeService;
     static {
 
         /** 一定要在创建AlipayTradeService之前调用Configs.init()设置默认参数
@@ -74,7 +74,7 @@ public class OrderServiceImpl implements IOrderService {
         //从购物车中获取数据
         List<Cart> cartList = cartMapper.selectCheckedCartByUserId(userId);
         //计算这个订单的总价
-        ServerResponse serverResponse = this.getCartOrderItem(userId,cartList);
+        ServerResponse<List<OrderItem>> serverResponse = this.getCartOrderItem(userId,cartList);
         if(!serverResponse.isSuccess()){
             return serverResponse;
         }
@@ -207,11 +207,10 @@ public class OrderServiceImpl implements IOrderService {
     }
 
     private Long createOrderNo() {
-        Long orderNo = System.currentTimeMillis()+new Random().nextInt(100);
-        return orderNo;
+        return System.currentTimeMillis()+new Random().nextInt(100);
     }
 
-    private ServerResponse getCartOrderItem(Integer userId,List<Cart> cartList){
+    private ServerResponse<List<OrderItem>> getCartOrderItem(Integer userId,List<Cart> cartList){
         List<OrderItem> orderItemList = Lists.newArrayList();
         if(CollectionUtils.isEmpty(cartList)){
             return ServerResponse.createByErrorMessage("购物车为空");
@@ -329,7 +328,7 @@ public class OrderServiceImpl implements IOrderService {
         PageHelper.startPage(pageNum,pageSize);
         List<Order> orderList = orderMapper.selectAllOrder();
         List<OrderVo> orderVoList = this.assembleOrderVoList(orderList,null);
-        PageInfo pageResult = new PageInfo(orderList);
+        PageInfo<OrderVo> pageResult = new PageInfo(orderList);
         pageResult.setList(orderVoList);
         return ServerResponse.createBySuccess(pageResult);
     }
@@ -347,7 +346,7 @@ public class OrderServiceImpl implements IOrderService {
 
 
 
-    public ServerResponse<PageInfo> manageSearch(Long orderNo,int pageNum,int pageSize){
+    public ServerResponse manageSearch(Long orderNo,int pageNum,int pageSize){
         PageHelper.startPage(pageNum,pageSize);
         Order order = orderMapper.selectByOrderNo(orderNo);
         if(order != null){
@@ -395,7 +394,7 @@ public class OrderServiceImpl implements IOrderService {
         String outTradeNo = order.getOrderNo().toString();
 
         // (必填) 订单标题，粗略描述用户的支付目的。如“xxx品牌xxx门店当面付扫码消费”
-        String subject = new StringBuilder().append("jmall扫码支付,订单号:").append(outTradeNo).toString();
+        String subject = "jmall扫码支付,订单号:" + outTradeNo;
 
         // (必填) 订单总金额，单位为元，不能超过1亿元
         // 如果同时传入了【打折金额】,【不可打折金额】,【订单总金额】三者,则必须满足如下条件:【订单总金额】=【打折金额】+【不可打折金额】
@@ -410,7 +409,7 @@ public class OrderServiceImpl implements IOrderService {
         String sellerId = "";
 
         // 订单描述，可以对交易或商品进行一个详细地描述，比如填写"购买商品2件共15.00元"
-        String body = new StringBuilder().append("订单").append(outTradeNo).append("购买商品共").append(totalAmount).append("元").toString();;
+        String body = "订单" + outTradeNo + "购买商品共" + totalAmount + "元";;
 
         // 商户操作员编号，添加此参数可以为商户操作员做销售统计
         String operatorId = "test_operator_id";
@@ -514,7 +513,7 @@ public class OrderServiceImpl implements IOrderService {
         //查询是否有此订单
         Order order = orderMapper.selectByOrderNo(orderNo);
         if(order == null){
-            return ServerResponse.createByErrorMessage("非快乐慕商城的订单,回调忽略");
+            return ServerResponse.createByErrorMessage("非本商城的订单,回调忽略");
         }
         //判断订单状态，如果>=20,则重复调用
         if(order.getStatus() >= Const.OrderStatusEnum.PAID.getCode()){

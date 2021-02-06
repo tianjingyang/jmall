@@ -32,40 +32,44 @@ public class OrderController {
     @RequestMapping("create.do")
     @ResponseBody
     public ServerResponse create(HttpServletRequest httpServletRequest, Integer shippingId) {
-        User user = userController.getCurrentUser(httpServletRequest).getData();
-        if (user == null) {
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
+        ServerResponse response = userController.getCurrentUser(httpServletRequest);
+        if (!response.isSuccess()) {
+            return response;
         }
+        User user = (User)response.getData();
         return iOrderService.createOrder(user.getId(),shippingId);
     }
 
     @RequestMapping("cancel.do")
     @ResponseBody
     public ServerResponse cancelOrder(HttpServletRequest httpServletRequest, Long orderNo) {
-        User user = userController.getCurrentUser(httpServletRequest).getData();
-        if (user == null) {
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
+        ServerResponse response = userController.getCurrentUser(httpServletRequest);
+        if (!response.isSuccess()) {
+            return response;
         }
+        User user = (User)response.getData();
         return iOrderService.cancelOrder(user.getId(),orderNo);
     }
 
     @RequestMapping("get_order_cart_product.do")
     @ResponseBody
     public ServerResponse getOrderCartProduct(HttpServletRequest httpServletRequest){
-        User user = userController.getCurrentUser(httpServletRequest).getData();
-        if(user ==null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
+        ServerResponse response = userController.getCurrentUser(httpServletRequest);
+        if (!response.isSuccess()) {
+            return response;
         }
+        User user = (User)response.getData();
         return iOrderService.getOrderCartProduct(user.getId());
     }
 
     @RequestMapping("detail.do")
     @ResponseBody
     public ServerResponse detail(HttpServletRequest httpServletRequest,Long orderNo){
-        User user = userController.getCurrentUser(httpServletRequest).getData();
-        if(user ==null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
+        ServerResponse response = userController.getCurrentUser(httpServletRequest);
+        if (!response.isSuccess()) {
+            return response;
         }
+        User user = (User)response.getData();
         return iOrderService.getOrderDetail(user.getId(),orderNo);
     }
 
@@ -73,10 +77,11 @@ public class OrderController {
     @ResponseBody
     public ServerResponse list(HttpServletRequest httpServletRequest, @RequestParam(value = "pageNum",defaultValue = "1") int pageNum,
                                @RequestParam(value = "pageSize",defaultValue = "10") int pageSize){
-        User user = userController.getCurrentUser(httpServletRequest).getData();
-        if(user ==null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
+        ServerResponse response = userController.getCurrentUser(httpServletRequest);
+        if (!response.isSuccess()) {
+            return response;
         }
+        User user = (User)response.getData();
         return iOrderService.getOrderList(user.getId(),pageNum,pageSize);
     }
 
@@ -90,10 +95,11 @@ public class OrderController {
     @RequestMapping("pay.do")
     @ResponseBody
     public ServerResponse pay(HttpServletRequest httpServletRequest, Long orderNo, HttpServletRequest request) {
-        User user = userController.getCurrentUser(httpServletRequest).getData();
-        if (user == null) {
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
+        ServerResponse response = userController.getCurrentUser(httpServletRequest);
+        if (!response.isSuccess()) {
+            return response;
         }
+        User user = (User)response.getData();
         String path = request.getSession().getServletContext().getRealPath("upload");
         return iOrderService.pay(orderNo,user.getId(),path);
     }
@@ -140,10 +146,11 @@ public class OrderController {
     @RequestMapping("query_order_pay_status.do")
     @ResponseBody
     public ServerResponse<Boolean> queryOrderPayStatus(HttpServletRequest httpServletRequest, Long orderNo){
-        User user = userController.getCurrentUser(httpServletRequest).getData();
-        if(user ==null){
-            return ServerResponse.createByErrorCodeMessage(ResponseCode.NEED_LOGIN.getCode(),ResponseCode.NEED_LOGIN.getDesc());
+        ServerResponse response = userController.getCurrentUser(httpServletRequest);
+        if (!response.isSuccess()) {
+            return response;
         }
+        User user = (User)response.getData();
 
         ServerResponse serverResponse = iOrderService.queryOrderPayStatus(user.getId(),orderNo);
         if(serverResponse.isSuccess()){

@@ -16,22 +16,22 @@ public class RedisCluster {
 
     private static JedisCluster jedisCluster = null;
 
-    private static Integer maxTotal = Integer.parseInt(PropertiesUtil.getProperty("redis.maxTotal","20")); //最大连接数
-    private static Integer maxIdle = Integer.parseInt(PropertiesUtil.getProperty("redis.maxIdle","10"));//在jedispool中最大的idle状态(空闲的)的jedis实例的个数
-    private static Integer minIdle = Integer.parseInt(PropertiesUtil.getProperty("redis.minIdle","2"));//在jedispool中最小的idle状态(空闲的)的jedis实例的个数
-    private static Integer maxWaitMillis = Integer.parseInt(PropertiesUtil.getProperty("redis.maxWaitMills","1000"));
-    private static Integer minEvictableIdleTimeMillis = Integer.parseInt(PropertiesUtil.getProperty("redis.minEvictableIdleTimeMillis","6000"));
-    private static Integer timeBetweenEvictionRunsMillis = Integer.parseInt(PropertiesUtil.getProperty("redis.timeBetweenEvictionRunsMillis","30000"));
-    private static Boolean testOnBorrow = Boolean.parseBoolean(PropertiesUtil.getProperty("redis.testOnBorrow","true"));//在borrow一个jedis实例的时候，是否要进行验证操作，如果赋值true。则得到的jedis实例肯定是可以用的。
-    private static Boolean testOnReturn = Boolean.parseBoolean(PropertiesUtil.getProperty("redis.testOnReturn","true"));//在return一个jedis实例的时候，是否要进行验证操作，如果赋值true。则放回jedispool的jedis实例肯定是可以用的。
+    private static final Integer maxTotal = Integer.parseInt(PropertiesUtil.getProperty("redis.maxTotal","20")); //最大连接数
+    private static final Integer maxIdle = Integer.parseInt(PropertiesUtil.getProperty("redis.maxIdle","10"));//在jedispool中最大的idle状态(空闲的)的jedis实例的个数
+    private static final Integer minIdle = Integer.parseInt(PropertiesUtil.getProperty("redis.minIdle","2"));//在jedispool中最小的idle状态(空闲的)的jedis实例的个数
+    private static final Integer maxWaitMillis = Integer.parseInt(PropertiesUtil.getProperty("redis.maxWaitMills","1000"));
+    private static final Integer minEvictableIdleTimeMillis = Integer.parseInt(PropertiesUtil.getProperty("redis.minEvictableIdleTimeMillis","6000"));
+    private static final Integer timeBetweenEvictionRunsMillis = Integer.parseInt(PropertiesUtil.getProperty("redis.timeBetweenEvictionRunsMillis","30000"));
+    private static final Boolean testOnBorrow = Boolean.parseBoolean(PropertiesUtil.getProperty("redis.testOnBorrow","true"));//在borrow一个jedis实例的时候，是否要进行验证操作，如果赋值true。则得到的jedis实例肯定是可以用的。
+    private static final Boolean testOnReturn = Boolean.parseBoolean(PropertiesUtil.getProperty("redis.testOnReturn","true"));//在return一个jedis实例的时候，是否要进行验证操作，如果赋值true。则放回jedispool的jedis实例肯定是可以用的。
 
-    private static String redisClusterIp = PropertiesUtil.getProperty("redis.cluster.ip");
-    private static int redisCluster1Port = Integer.parseInt(PropertiesUtil.getProperty("redis.cluster.port1"));
-    private static int redisCluster2Port = Integer.parseInt(PropertiesUtil.getProperty("redis.cluster.port2"));
-    private static int redisCluster3Port = Integer.parseInt(PropertiesUtil.getProperty("redis.cluster.port3"));
-    private static int redisCluster4Port = Integer.parseInt(PropertiesUtil.getProperty("redis.cluster.port4"));
-    private static int redisCluster5Port = Integer.parseInt(PropertiesUtil.getProperty("redis.cluster.port5"));
-    private static int redisCluster6Port = Integer.parseInt(PropertiesUtil.getProperty("redis.cluster.port6"));
+    private static final String redisClusterIp = PropertiesUtil.getProperty("redis.cluster.ip");
+    private static final Integer redisCluster1Port = Integer.parseInt(PropertiesUtil.getProperty("redis.cluster.port1","7000"));
+    private static final Integer redisCluster2Port = Integer.parseInt(PropertiesUtil.getProperty("redis.cluster.port2","7001"));
+    private static final Integer redisCluster3Port = Integer.parseInt(PropertiesUtil.getProperty("redis.cluster.port3","7002"));
+    private static final Integer redisCluster4Port = Integer.parseInt(PropertiesUtil.getProperty("redis.cluster.port4","7003"));
+    private static final Integer redisCluster5Port = Integer.parseInt(PropertiesUtil.getProperty("redis.cluster.port5","7004"));
+    private static final Integer redisCluster6Port = Integer.parseInt(PropertiesUtil.getProperty("redis.cluster.port6","7005"));
 
     public synchronized static JedisCluster getJedisCluster() {
 

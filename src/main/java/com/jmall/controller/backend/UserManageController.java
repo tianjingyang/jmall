@@ -6,6 +6,7 @@ import com.jmall.pojo.User;
 import com.jmall.service.IUserService;
 import com.jmall.util.CookieUtil;
 import com.jmall.util.JsonUtil;
+import com.jmall.util.RedisClusterUtil;
 import com.jmall.util.RedisShardedPoolUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -31,7 +32,7 @@ public class UserManageController {
             if (user.getRole() == Const.Role.ROLE_ADMIN) {
                 CookieUtil.writeLoginToken(httpServletResponse,session.getId());
                 //缓存进redis
-                RedisShardedPoolUtil.setEx(session.getId(), JsonUtil.obj2String(response.getData()),Const.RedisCacheExtime.REDIS_SESSION_EXTIME);
+                RedisClusterUtil.setEx(session.getId(), JsonUtil.obj2String(response.getData()),Const.RedisCacheExtime.REDIS_SESSION_EXTIME);
                 return response;
             } else {
                 return ServerResponse.createByErrorMessage("需要管理员权限");
