@@ -1,5 +1,6 @@
 package com.jmall.util;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.net.ftp.FTPClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,10 +10,8 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.ConnectException;
 import java.util.List;
-
+@Slf4j
 public class FTPUtil {
-
-    private static  final Logger logger = LoggerFactory.getLogger(FTPUtil.class);
 
     private static String ftpIp = PropertiesUtil.getProperty("ftp.server.ip");
     private static String ftpUser = PropertiesUtil.getProperty("ftp.user");
@@ -27,9 +26,9 @@ public class FTPUtil {
 
     public static boolean uploadFile(List<File> fileList) throws IOException {
         FTPUtil ftpUtil = new FTPUtil(ftpIp,21,ftpUser,ftpPass);
-        logger.info("开始连接ftp服务器");
+        log.info("开始连接ftp服务器");
         boolean result = ftpUtil.uploadFile("img",fileList);
-        logger.info("开始连接ftp服务器,结束上传,上传结果:{}",result);
+        log.info("开始连接ftp服务器,结束上传,上传结果:{}",result);
         return result;
     }
 
@@ -56,7 +55,7 @@ public class FTPUtil {
                     ftpClient.storeFile(fileItem.getName(),fis);
                 }
             } catch (IOException e) {
-                logger.error("上传文件异常",e);
+                log.error("上传文件异常",e);
                 uploaded = false;
                 e.printStackTrace();
             } finally {
@@ -84,7 +83,7 @@ public class FTPUtil {
             ftpClient.connect(ip);
             isSuccess = ftpClient.login(user,pwd);
         } catch (IOException e) {
-            logger.error("连接FTP服务器异常",e);
+            log.error("连接FTP服务器异常",e);
         }
         return isSuccess;
     }
